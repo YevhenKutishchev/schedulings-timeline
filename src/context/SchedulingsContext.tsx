@@ -16,7 +16,8 @@ function loadFromStorage(): Scheduling[] {
 type Action =
   | { type: 'ADD'; payload: SchedulingDraft }
   | { type: 'UPDATE'; payload: { id: string } & SchedulingDraft }
-  | { type: 'DELETE'; payload: string };
+  | { type: 'DELETE'; payload: string }
+  | { type: 'RESET'; payload: Scheduling[] };
 
 function reducer(state: Scheduling[], action: Action): Scheduling[] {
   switch (action.type) {
@@ -38,6 +39,8 @@ function reducer(state: Scheduling[], action: Action): Scheduling[] {
       );
     case 'DELETE':
       return state.filter((s) => s.id !== action.payload);
+    case 'RESET':
+      return action.payload;
     default:
       return state;
   }
@@ -48,6 +51,7 @@ interface SchedulingsContextValue {
   add: (draft: SchedulingDraft) => void;
   update: (id: string, draft: SchedulingDraft) => void;
   remove: (id: string) => void;
+  reset: (items: Scheduling[]) => void;
 }
 
 const SchedulingsContext = createContext<SchedulingsContextValue | null>(null);
@@ -63,9 +67,10 @@ export function SchedulingsProvider({ children }: { children: ReactNode }) {
   const update = (id: string, draft: SchedulingDraft) =>
     dispatch({ type: 'UPDATE', payload: { id, ...draft } });
   const remove = (id: string) => dispatch({ type: 'DELETE', payload: id });
+  const reset = (items: Scheduling[]) => dispatch({ type: 'RESET', payload: items });
 
   return (
-    <SchedulingsContext value={{ schedulings, add, update, remove }}>
+    <SchedulingsContext value={{ schedulings, add, update, remove, reset }}>
       {children}
     </SchedulingsContext>
   );

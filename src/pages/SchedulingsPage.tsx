@@ -1,18 +1,20 @@
 import { useState } from 'react';
-import { Button, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Button, Stack, ToggleButton, ToggleButtonGroup, Typography, Divider } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { useSchedulings } from '../context/SchedulingsContext';
 import { SchedulingForm } from '../components/SchedulingForm/SchedulingForm';
 import { SchedulingTable } from '../components/SchedulingTable/SchedulingTable';
 import { SchedulingTimeline } from '../components/SchedulingTimeline/SchedulingTimeline';
+import { DEMO_SCHEDULINGS } from '../data/demoSchedulings';
 import type { Scheduling, SchedulingDraft } from '../types/scheduling';
 
 type ViewMode = 'table' | 'timeline';
 
 export function SchedulingsPage() {
-  const { schedulings, add, update, remove } = useSchedulings();
+  const { schedulings, add, update, remove, reset } = useSchedulings();
   const [view, setView] = useState<ViewMode>('table');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Scheduling | undefined>();
@@ -59,6 +61,15 @@ export function SchedulingsPage() {
               Timeline
             </ToggleButton>
           </ToggleButtonGroup>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<AutoAwesomeIcon />}
+            onClick={() => reset(DEMO_SCHEDULINGS)}
+          >
+            Demo data
+          </Button>
+          <Divider orientation="vertical" flexItem />
           <Button
             variant="contained"
             startIcon={<AddIcon />}
