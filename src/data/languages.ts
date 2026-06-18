@@ -1,0 +1,43 @@
+export interface Language {
+  tag: string; // BCP 47
+  label: string;
+}
+
+export const LANGUAGES: Language[] = [
+  { tag: 'ar', label: 'Arabic' },
+  { tag: 'zh-cn', label: 'Chinese (Simplified)' },
+  { tag: 'zh-tw', label: 'Chinese (Traditional)' },
+  { tag: 'cs', label: 'Czech' },
+  { tag: 'da', label: 'Danish' },
+  { tag: 'nl', label: 'Dutch' },
+  { tag: 'en-au', label: 'English (Australia)' },
+  { tag: 'en-gb', label: 'English (UK)' },
+  { tag: 'en-us', label: 'English (US)' },
+  { tag: 'fi', label: 'Finnish' },
+  { tag: 'fr-ca', label: 'French (Canada)' },
+  { tag: 'fr-fr', label: 'French (France)' },
+  { tag: 'de', label: 'German' },
+  { tag: 'el', label: 'Greek' },
+  { tag: 'he', label: 'Hebrew' },
+  { tag: 'hi', label: 'Hindi' },
+  { tag: 'hu', label: 'Hungarian' },
+  { tag: 'id', label: 'Indonesian' },
+  { tag: 'it', label: 'Italian' },
+  { tag: 'ja', label: 'Japanese' },
+  { tag: 'ko', label: 'Korean' },
+  { tag: 'ms', label: 'Malay' },
+  { tag: 'nb', label: 'Norwegian Bokmål' },
+  { tag: 'pl', label: 'Polish' },
+  { tag: 'pt-br', label: 'Portuguese (Brazil)' },
+  { tag: 'pt-pt', label: 'Portuguese (Portugal)' },
+  { tag: 'ro', label: 'Romanian' },
+  { tag: 'ru', label: 'Russian' },
+  { tag: 'es-419', label: 'Spanish (Latin America)' },
+  { tag: 'es-es', label: 'Spanish (Spain)' },
+  { tag: 'es-us', label: 'Spanish (US)' },
+  { tag: 'sv', label: 'Swedish' },
+  { tag: 'th', label: 'Thai' },
+  { tag: 'tr', label: 'Turkish' },
+  { tag: 'uk', label: 'Ukrainian' },
+  { tag: 'vi', label: 'Vietnamese' },
+];
