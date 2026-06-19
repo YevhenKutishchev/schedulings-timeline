@@ -7,11 +7,11 @@ import {
   Button,
   Stack,
   TextField,
-  Autocomplete,
 } from '@mui/material';
 import type { Scheduling, SchedulingDraft } from '../../types/scheduling';
 import { COUNTRIES } from '../../data/countries';
 import { LANGUAGES } from '../../data/languages';
+import { MultiAutocomplete } from './MultiAutocomplete';
 
 interface Props {
   open: boolean;
@@ -26,6 +26,16 @@ const empty: SchedulingDraft = {
   countries: [],
   languages: [],
 };
+
+const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({
+  id: c.code,
+  label: `${c.code.toUpperCase()} – ${c.label}`,
+}));
+
+const LANGUAGE_OPTIONS = LANGUAGES.map((l) => ({
+  id: l.tag,
+  label: `${l.tag} – ${l.label}`,
+}));
 
 export function SchedulingForm({ open, initial, onClose, onSubmit }: Props) {
   const [form, setForm] = useState<SchedulingDraft>(empty);
@@ -83,41 +93,21 @@ export function SchedulingForm({ open, initial, onClose, onSubmit }: Props) {
             helperText={errors.endDate}
             fullWidth
           />
-          <Autocomplete
-            multiple
-            options={COUNTRIES}
-            getOptionLabel={(o) => `${o.code.toUpperCase()} – ${o.label}`}
-            value={COUNTRIES.filter((c) => form.countries.includes(c.code))}
-            onChange={(_, value) =>
-              setForm((f) => ({ ...f, countries: value.map((v) => v.code) }))
-            }
-            slotProps={{ chip: { size: 'small' } }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Countries"
-                error={!!errors.countries}
-                helperText={errors.countries}
-              />
-            )}
+          <MultiAutocomplete
+            options={COUNTRY_OPTIONS}
+            value={form.countries}
+            onChange={(ids) => setForm((f) => ({ ...f, countries: ids }))}
+            label="Countries"
+            error={!!errors.countries}
+            helperText={errors.countries}
           />
-          <Autocomplete
-            multiple
-            options={LANGUAGES}
-            getOptionLabel={(o) => `${o.tag} – ${o.label}`}
-            value={LANGUAGES.filter((l) => form.languages.includes(l.tag))}
-            onChange={(_, value) =>
-              setForm((f) => ({ ...f, languages: value.map((v) => v.tag) }))
-            }
-            slotProps={{ chip: { size: 'small' } }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Languages"
-                error={!!errors.languages}
-                helperText={errors.languages}
-              />
-            )}
+          <MultiAutocomplete
+            options={LANGUAGE_OPTIONS}
+            value={form.languages}
+            onChange={(ids) => setForm((f) => ({ ...f, languages: ids }))}
+            label="Languages"
+            error={!!errors.languages}
+            helperText={errors.languages}
           />
         </Stack>
       </DialogContent>
