@@ -4,6 +4,18 @@ A React application for creating, editing, and visualizing **Schedulings** — d
 
 ---
 
+## To do
+
+* Add action-based editing.
+  * Add the possibility to add/remove languages to all active territories in a specified time interval.
+  * When users add or remove something, we probably need to give them a hint on what is active on a start date.
+  * addToTimeline function's ([docs/SCHEDULING_CONCEPT.md](docs/SCHEDULING_CONCEPT.md)) algorithm doesn't merge territory 
+    groups with the same language sets. Decided to not to add it before draft/published statuses added to schedulings.
+* Think about a user-friendly way to display diffs. What countries/languages were added/removed on a specific date.
+* Add status fields (draft/published) to schedulings. At the moment schedulings don't have a status field, so there is no such thing as publishing schedulings.
+
+---
+
 ## What is a Scheduling?
 
 A **Scheduling** defines a distribution window for a piece of content across a set of territories and languages. It is the source of truth from which **Avails** are derived (Avail generation is out of scope for this app).
