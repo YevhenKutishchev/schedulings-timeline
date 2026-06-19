@@ -17,14 +17,16 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CheckIcon from '@mui/icons-material/Check';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import TimelineIcon from '@mui/icons-material/Timeline';
+import ScatterPlotIcon from '@mui/icons-material/ScatterPlot';
 import { useSchedulings } from '../context/SchedulingsContext';
 import { SchedulingForm } from '../components/SchedulingForm/SchedulingForm';
 import { SchedulingTable } from '../components/SchedulingTable/SchedulingTable';
 import { SchedulingTimeline } from '../components/SchedulingTimeline/SchedulingTimeline';
+import { SchedulingNonLinearTimeline } from '../components/SchedulingNonLinearTimeline/SchedulingNonLinearTimeline';
 import { DEMO_SETS } from '../data/demoSchedulings';
 import type { Scheduling, SchedulingDraft } from '../types/scheduling';
 
-type ViewMode = 'table' | 'timeline';
+type ViewMode = 'table' | 'timeline' | 'nonlinear';
 
 export function SchedulingsPage() {
   const { schedulings, add, update, remove, reset } = useSchedulings();
@@ -82,6 +84,10 @@ export function SchedulingsPage() {
               <TimelineIcon fontSize="small" sx={{ mr: 0.5 }} />
               Timeline
             </ToggleButton>
+            <ToggleButton value="nonlinear">
+              <ScatterPlotIcon fontSize="small" sx={{ mr: 0.5 }} />
+              Non-linear
+            </ToggleButton>
           </ToggleButtonGroup>
 
           <Button
@@ -131,6 +137,9 @@ export function SchedulingsPage() {
       )}
       {view === 'timeline' && (
         <SchedulingTimeline schedulings={schedulings} onEdit={handleEdit} onDelete={remove} />
+      )}
+      {view === 'nonlinear' && (
+        <SchedulingNonLinearTimeline schedulings={schedulings} onEdit={handleEdit} onDelete={remove} />
       )}
 
       <SchedulingForm
