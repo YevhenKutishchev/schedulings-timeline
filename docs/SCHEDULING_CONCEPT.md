@@ -256,6 +256,96 @@ If `au` was the only country in a scheduling, the entire scheduling is deleted.
 
 ---
 
+### 7. Adding languages to existing and new countries simultaneously → different results per country
+
+**Initial state:**
+```json
+[
+  { "startDate": "2026-01-01", "endDate": "2100-12-31", "countries": ["us", "ca"], "languages": ["en-us"] }
+]
+```
+
+**Operation:** Add `[us, gb]` with `["es"]` from `2026-01-01` to `2100-12-31`
+
+- `us` is **existing** → `union(["en-us"], ["es"])` = `["en-us", "es"]`
+- `gb` is **new** → only `["es"]` (no prior languages to merge with)
+- `ca` is not in the operation → keeps `["en-us"]` unchanged
+
+`us` and `gb` end up with different language sets and cannot share a scheduling:
+
+```json
+[
+  { "startDate": "2026-01-01", "endDate": "2100-12-31", "countries": ["ca"], "languages": ["en-us"] },
+  { "startDate": "2026-01-01", "endDate": "2100-12-31", "countries": ["us"], "languages": ["en-us", "es"] },
+  { "startDate": "2026-01-01", "endDate": "2100-12-31", "countries": ["gb"], "languages": ["es"] }
+]
+```
+
+---
+
+## Add Operation Algorithm
+
+Adds countries with a given set of languages to the timeline for a specified date range.
+Existing schedulings that overlap are automatically split and merged as needed.
+
+### Key distinction
+
+- **Existing country** in an overlapping scheduling → gets `union(existing_languages, operation_languages)`
+- **New country** (not in any overlapping scheduling) → gets only `operation_languages`
+
+See **Example 7** for an illustration of why this distinction matters.
+
+### Pseudocode
+
+```
+addToTimeline(schedulings, { startDate, endDate, countries, languages }):
+
+  affected   = schedulings that overlap [startDate, endDate]
+  unaffected = the rest (unchanged)
+  result     = []
+
+  for each S in affected:
+
+    // Part BEFORE the operation — unchanged
+    if S.startDate < startDate:
+      result.push({ ...S, endDate: startDate - 1day })
+
+    overlapStart = max(S.startDate, startDate)
+    overlapEnd   = min(S.endDate, endDate)
+
+    inOperation    = S.countries ∩ countries   // exist in both S and the operation
+    notInOperation = S.countries \ countries   // only in S
+
+    if inOperation is not empty:
+      mergedLangs = union(S.languages, languages)
+      if notInOperation is not empty:
+        // Countries outside the operation keep their original languages
+        result.push({ overlapStart, overlapEnd, countries: notInOperation, languages: S.languages })
+      result.push({ overlapStart, overlapEnd, countries: inOperation, languages: mergedLangs })
+    else:
+      // No countries from the operation in this scheduling — unchanged
+      result.push({ overlapStart, overlapEnd, countries: S.countries, languages: S.languages })
+
+    // Part AFTER the operation — unchanged
+    if S.endDate > endDate:
+      result.push({ ...S, startDate: endDate + 1day })
+
+  // Countries from the operation not present in any affected scheduling
+  coveredCountries = union of all countries across affected schedulings
+  newCountries     = countries \ coveredCountries
+  if newCountries is not empty:
+    result.push({ startDate, endDate, countries: newCountries, languages })
+
+  // Merge adjacent schedulings with identical countries and languages
+  result = mergeAdjacent([...unaffected, ...result])
+
+  return result
+```
+
+`mergeAdjacent`: if two schedulings have the same `countries` and `languages`, and one ends the day before the other starts — combine them into one.
+
+---
+
 ## Invariants
 
 These rules must always hold across the full set of schedulings for a given piece of content:
