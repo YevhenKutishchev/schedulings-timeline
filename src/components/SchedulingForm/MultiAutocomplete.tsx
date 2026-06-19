@@ -70,7 +70,12 @@ export function MultiAutocomplete({ options, value, onChange, label, error, help
         );
       }}
       renderInput={(params) => (
-        <TextField {...params} label={label} error={error} helperText={helperText} />
+        <TextField
+          {...params}
+          label={value.length > 0 ? `${label} (${value.length})` : label}
+          error={error}
+          helperText={helperText}
+        />
       )}
     />
   );
