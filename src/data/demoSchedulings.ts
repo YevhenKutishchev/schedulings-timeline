@@ -10,13 +10,23 @@ const ts = '2025-12-01T00:00:00.000Z';
 export const DEMO_SETS: DemoSet[] = [
   {
     name: 'FTLUNC0001',
-    schedulings: [
-      { id: 'na-1', startDate: '2026-01-01', endDate: '2026-06-30', countries: ['us', 'ca'], languages: ['en-us', 'es-us'], createdAt: ts, updatedAt: ts },
-      { id: 'na-2', startDate: '2026-04-01', endDate: '2026-12-31', countries: ['us'], languages: ['en-us'], createdAt: ts, updatedAt: ts },
-      { id: 'na-3', startDate: '2026-07-01', endDate: '2027-06-30', countries: ['ca'], languages: ['en-us', 'fr-ca'], createdAt: ts, updatedAt: ts },
-      { id: 'na-4', startDate: '2025-11-01', endDate: '2026-05-31', countries: ['mx'], languages: ['es-419'], createdAt: ts, updatedAt: ts },
-      { id: 'na-5', startDate: '2026-03-01', endDate: '2026-09-30', countries: ['us', 'ca', 'mx'], languages: ['en-us', 'es-us', 'fr-ca'], createdAt: ts, updatedAt: ts },
-    ],
+    schedulings: [{
+      "startDate": "2026-06-19",
+      "endDate": "2100-12-31",
+      "countries": ["ar", "au", "at", "be", "br"],
+      "languages": ["ar", "zh-cn", "zh-tw", "cs"],
+      "id": "91f28b3a-7640-4fb0-be7a-a130d81fdc88",
+      "createdAt": "2026-06-19T16:56:47.977Z",
+      "updatedAt": "2026-06-19T16:56:47.977Z"
+    }, {
+      "startDate": "2028-01-01",
+      "endDate": "2100-12-31",
+      "countries": ["br", "ca"],
+      "languages": ["fi"],
+      "id": "0934402a-c088-4366-ae83-3fdaee6f3150",
+      "createdAt": "2026-06-19T16:58:03.215Z",
+      "updatedAt": "2026-06-19T16:58:03.215Z"
+    }],
   },
   {
     name: 'Europe',
