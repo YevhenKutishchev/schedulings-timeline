@@ -20,12 +20,14 @@ interface Props {
   onSubmit: (draft: SchedulingDraft) => void;
 }
 
-const empty: SchedulingDraft = {
-  startDate: '',
-  endDate: '',
+const today = () => new Date().toISOString().split('T')[0];
+
+const emptyDraft = (): SchedulingDraft => ({
+  startDate: today(),
+  endDate: '9998-12-31',
   countries: [],
   languages: [],
-};
+});
 
 const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({
   id: c.code,
@@ -38,7 +40,7 @@ const LANGUAGE_OPTIONS = LANGUAGES.map((l) => ({
 }));
 
 export function SchedulingForm({ open, initial, onClose, onSubmit }: Props) {
-  const [form, setForm] = useState<SchedulingDraft>(empty);
+  const [form, setForm] = useState<SchedulingDraft>(emptyDraft);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export function SchedulingForm({ open, initial, onClose, onSubmit }: Props) {
       setForm(
         initial
           ? { startDate: initial.startDate, endDate: initial.endDate, countries: initial.countries, languages: initial.languages }
-          : empty,
+          : emptyDraft(),
       );
       setErrors({});
     }
@@ -78,7 +80,13 @@ export function SchedulingForm({ open, initial, onClose, onSubmit }: Props) {
             type="date"
             value={form.startDate}
             onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
-            slotProps={{ inputLabel: { shrink: true } }}
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: {
+                ...(!initial ? { min: today() } : {}),
+                ...(form.endDate ? { max: form.endDate } : {}),
+              },
+            }}
             error={!!errors.startDate}
             helperText={errors.startDate}
             fullWidth
@@ -88,7 +96,12 @@ export function SchedulingForm({ open, initial, onClose, onSubmit }: Props) {
             type="date"
             value={form.endDate}
             onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))}
-            slotProps={{ inputLabel: { shrink: true } }}
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: {
+                ...(form.startDate ? { min: form.startDate } : {}),
+              },
+            }}
             error={!!errors.endDate}
             helperText={errors.endDate}
             fullWidth
