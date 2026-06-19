@@ -8,6 +8,8 @@ A React application for creating, editing, and visualizing **Schedulings** — d
 
 A **Scheduling** defines a distribution window for a piece of content across a set of territories and languages. It is the source of truth from which **Avails** are derived (Avail generation is out of scope for this app).
 
+For a detailed explanation of normalization rules, edge cases, and the add operation algorithm, see [docs/SCHEDULING_CONCEPT.md](docs/SCHEDULING_CONCEPT.md).
+
 ### Data Model
 
 ```typescript
