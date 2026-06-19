@@ -8,7 +8,6 @@ import {
   Stack,
   TextField,
   Autocomplete,
-  Chip,
 } from '@mui/material';
 import type { Scheduling, SchedulingDraft } from '../../types/scheduling';
 import { COUNTRIES } from '../../data/countries';
@@ -87,21 +86,12 @@ export function SchedulingForm({ open, initial, onClose, onSubmit }: Props) {
           <Autocomplete
             multiple
             options={COUNTRIES}
-            getOptionLabel={(o) => o.label}
+            getOptionLabel={(o) => `${o.code.toUpperCase()} – ${o.label}`}
             value={COUNTRIES.filter((c) => form.countries.includes(c.code))}
             onChange={(_, value) =>
               setForm((f) => ({ ...f, countries: value.map((v) => v.code) }))
             }
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip
-                  label={`${option.code.toUpperCase()} – ${option.label}`}
-                  size="small"
-                  {...getTagProps({ index })}
-                  key={option.code}
-                />
-              ))
-            }
+            slotProps={{ chip: { size: 'small' } }}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -114,21 +104,12 @@ export function SchedulingForm({ open, initial, onClose, onSubmit }: Props) {
           <Autocomplete
             multiple
             options={LANGUAGES}
-            getOptionLabel={(o) => o.label}
+            getOptionLabel={(o) => `${o.tag} – ${o.label}`}
             value={LANGUAGES.filter((l) => form.languages.includes(l.tag))}
             onChange={(_, value) =>
               setForm((f) => ({ ...f, languages: value.map((v) => v.tag) }))
             }
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip
-                  label={`${option.tag} – ${option.label}`}
-                  size="small"
-                  {...getTagProps({ index })}
-                  key={option.tag}
-                />
-              ))
-            }
+            slotProps={{ chip: { size: 'small' } }}
             renderInput={(params) => (
               <TextField
                 {...params}

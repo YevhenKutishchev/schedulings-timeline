@@ -57,7 +57,7 @@ export function SchedulingTable({ schedulings, onEdit, onDelete }: Props) {
               <TableCell>{s.startDate}</TableCell>
               <TableCell>{s.endDate}</TableCell>
               <TableCell>
-                <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
                   {s.countries.map((code) => (
                     <Chip
                       key={code}
@@ -69,7 +69,7 @@ export function SchedulingTable({ schedulings, onEdit, onDelete }: Props) {
                 </Stack>
               </TableCell>
               <TableCell>
-                <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
                   {s.languages.map((tag) => (
                     <Chip
                       key={tag}

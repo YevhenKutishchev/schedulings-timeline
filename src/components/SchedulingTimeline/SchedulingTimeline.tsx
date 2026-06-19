@@ -170,10 +170,10 @@ export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
                 }}
               >
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="caption" color="text.secondary" display="block" noWrap>
+                  <Typography variant="caption" noWrap sx={{ color: 'text.secondary', display: 'block' }}>
                     {s.startDate} – {s.endDate}
                   </Typography>
-                  <Stack direction="row" flexWrap="wrap" gap={0.25} mt={0.25}>
+                  <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.25, mt: 0.25 }}>
                     {s.countries.slice(0, 3).map((c) => (
                       <Chip key={c} label={c.toUpperCase()} size="small" sx={{ height: 16, fontSize: 10 }} />
                     ))}
@@ -231,13 +231,13 @@ export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
                 <Tooltip
                   title={
                     <Box sx={{ p: 0.5 }}>
-                      <Typography variant="body2" fontWeight={600}>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {s.startDate} → {s.endDate}
                       </Typography>
-                      <Typography variant="caption" display="block" mt={0.5}>
+                      <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
                         Countries: {s.countries.map(countryLabel).join(', ')}
                       </Typography>
-                      <Typography variant="caption" display="block">
+                      <Typography variant="caption" sx={{ display: 'block' }}>
                         Languages: {s.languages.map(languageLabel).join(', ')}
                       </Typography>
                     </Box>
