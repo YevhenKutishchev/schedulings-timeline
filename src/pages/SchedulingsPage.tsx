@@ -1,14 +1,27 @@
 import { useState } from 'react';
-import { Button, Stack, ToggleButton, ToggleButtonGroup, Typography, Divider } from '@mui/material';
+import {
+  Button,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  Divider,
+  Menu,
+  MenuItem,
+  ListItemText,
+  ListItemIcon,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import CheckIcon from '@mui/icons-material/Check';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { useSchedulings } from '../context/SchedulingsContext';
 import { SchedulingForm } from '../components/SchedulingForm/SchedulingForm';
 import { SchedulingTable } from '../components/SchedulingTable/SchedulingTable';
 import { SchedulingTimeline } from '../components/SchedulingTimeline/SchedulingTimeline';
-import { DEMO_SCHEDULINGS } from '../data/demoSchedulings';
+import { DEMO_SETS } from '../data/demoSchedulings';
 import type { Scheduling, SchedulingDraft } from '../types/scheduling';
 
 type ViewMode = 'table' | 'timeline';
@@ -18,6 +31,8 @@ export function SchedulingsPage() {
   const [view, setView] = useState<ViewMode>('table');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Scheduling | undefined>();
+  const [demoAnchor, setDemoAnchor] = useState<HTMLElement | null>(null);
+  const [activeDemoName, setActiveDemoName] = useState<string | null>(null);
 
   function handleSubmit(draft: SchedulingDraft) {
     if (editing) {
@@ -37,6 +52,13 @@ export function SchedulingsPage() {
   function handleClose() {
     setFormOpen(false);
     setEditing(undefined);
+  }
+
+  function handleDemoSelect(index: number) {
+    const set = DEMO_SETS[index];
+    reset(set.schedulings);
+    setActiveDemoName(set.name);
+    setDemoAnchor(null);
   }
 
   return (
@@ -61,14 +83,38 @@ export function SchedulingsPage() {
               Timeline
             </ToggleButton>
           </ToggleButtonGroup>
+
           <Button
             variant="outlined"
             size="small"
             startIcon={<AutoAwesomeIcon />}
-            onClick={() => reset(DEMO_SCHEDULINGS)}
+            endIcon={<ArrowDropDownIcon />}
+            onClick={(e) => setDemoAnchor(e.currentTarget)}
           >
-            Demo data
+            {activeDemoName ?? 'Demo data'}
           </Button>
+          <Menu
+            anchorEl={demoAnchor}
+            open={Boolean(demoAnchor)}
+            onClose={() => setDemoAnchor(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          >
+            {DEMO_SETS.map((set, i) => {
+              const isActive = set.name === activeDemoName;
+              return (
+                <MenuItem key={set.name} onClick={() => handleDemoSelect(i)} selected={isActive}>
+                  <ListItemIcon sx={{ minWidth: 32 }}>
+                    {isActive && <CheckIcon fontSize="small" color="primary" />}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={set.name}
+                    secondary={`${set.schedulings.length} schedulings`}
+                  />
+                </MenuItem>
+              );
+            })}
+          </Menu>
+
           <Divider orientation="vertical" flexItem />
           <Button
             variant="contained"
