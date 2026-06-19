@@ -24,7 +24,7 @@ const today = () => new Date().toISOString().split('T')[0];
 
 const emptyDraft = (): SchedulingDraft => ({
   startDate: today(),
-  endDate: '9998-12-31',
+  endDate: '2100-12-31',
   countries: [],
   languages: [],
 });
