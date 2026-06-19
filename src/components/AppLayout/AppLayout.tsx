@@ -13,7 +13,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth={false} sx={{ py: 4, px: 4 }}>
         {children}
       </Container>
     </Box>
