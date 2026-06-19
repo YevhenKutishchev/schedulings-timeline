@@ -13,6 +13,7 @@ A React application for creating, editing, and visualizing **Schedulings** — d
     groups with the same language sets. Decided to not to add it before draft/published statuses added to schedulings.
 * Think about a user-friendly way to display diffs. What countries/languages were added/removed on a specific date.
 * Add status fields (draft/published) to schedulings. At the moment schedulings don't have a status field, so there is no such thing as publishing schedulings.
+  * Can we publish draft schedulings that start in the past?
 
 ---
 
