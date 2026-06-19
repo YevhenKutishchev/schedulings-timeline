@@ -38,6 +38,7 @@ export function MultiAutocomplete({ options, value, onChange, label, error, help
   return (
     <Autocomplete
       multiple
+      disableCloseOnSelect
       options={extendedOptions}
       getOptionLabel={(o) => o.label}
       value={selectedOptions}
