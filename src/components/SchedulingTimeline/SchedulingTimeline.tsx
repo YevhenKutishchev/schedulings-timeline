@@ -59,13 +59,29 @@ export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
   }
 
   // Month markers
-  const months: { label: string; pct: number }[] = [];
+  const NICE_STEPS = [1, 2, 3, 6, 12, 24, 36, 60, 120, 240, 600, 1200];
+  const niceStep = (raw: number) => NICE_STEPS.find((s) => s >= raw) ?? 1200;
+
+  const totalMonths = Math.ceil(rangeEnd.diff(rangeStart, 'month', true));
+  const labelStep = niceStep(Math.ceil(totalMonths / 10));
+  const gridStep  = niceStep(Math.ceil(totalMonths / 40));
+  const labelFmt  = labelStep >= 12 ? 'YYYY' : 'MMM YYYY';
+
+  const allMonths: { label: string; pct: number; isLabel: boolean }[] = [];
   let cursor = rangeStart.startOf('month');
+  let monthIndex = 0;
   while (cursor.isBefore(rangeEnd)) {
     const p = pct(cursor.isBefore(rangeStart) ? rangeStart : cursor);
-    months.push({ label: cursor.format('MMM YYYY'), pct: p });
+    const isGrid  = monthIndex % gridStep === 0;
+    const isLabel = monthIndex % labelStep === 0;
+    if (isGrid || isLabel) {
+      allMonths.push({ label: cursor.format(labelFmt), pct: p, isLabel });
+    }
     cursor = cursor.add(1, 'month');
+    monthIndex++;
   }
+
+  const months = allMonths; // grid lines + label flags combined
 
   // Today marker
   const today = dayjs();
@@ -87,35 +103,17 @@ export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
           <Box sx={{ width: LEFT_PANEL, flexShrink: 0, borderRight: 1, borderColor: 'divider' }} />
           <Box sx={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
             {months.map((m) => (
-              <Typography
-                key={m.label}
-                variant="caption"
-                color="text.secondary"
-                sx={{
-                  position: 'absolute',
-                  left: `${m.pct}%`,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  whiteSpace: 'nowrap',
-                  pl: 0.5,
-                }}
-              >
-                {m.label}
-              </Typography>
-            ))}
-            {/* Month grid lines */}
-            {months.map((m) => (
-              <Box
-                key={`line-${m.label}`}
-                sx={{
-                  position: 'absolute',
-                  left: `${m.pct}%`,
-                  top: 0,
-                  bottom: 0,
-                  width: '1px',
-                  bgcolor: 'divider',
-                }}
-              />
+              <Box key={`header-${m.pct}`} sx={{ position: 'absolute', left: `${m.pct}%`, top: 0, bottom: 0 }}>
+                <Box sx={{ position: 'absolute', top: 0, bottom: 0, width: '1px', bgcolor: 'divider' }} />
+                {m.isLabel && (
+                  <Typography
+                    variant="caption"
+                    sx={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', whiteSpace: 'nowrap', pl: 0.5, color: 'text.secondary' }}
+                  >
+                    {m.label}
+                  </Typography>
+                )}
+              </Box>
             ))}
             {/* Today line in header */}
             {todayPct !== null && (
@@ -196,10 +194,10 @@ export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
 
               {/* Bar track */}
               <Box sx={{ flex: 1, position: 'relative' }}>
-                {/* Month grid lines */}
+                {/* Month grid lines — every month */}
                 {months.map((m) => (
                   <Box
-                    key={`row-line-${m.label}`}
+                    key={`row-line-${m.pct}`}
                     sx={{
                       position: 'absolute',
                       left: `${m.pct}%`,
