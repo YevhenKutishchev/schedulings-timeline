@@ -29,7 +29,7 @@ export const DEMO_SETS: DemoSet[] = [
     }],
   },
   {
-    name: 'Europe',
+    name: 'FTLUNC0002',
     schedulings: [
       { id: 'eu-1', startDate: '2026-01-01', endDate: '2026-12-31', countries: ['gb', 'ie'], languages: ['en-gb'], createdAt: ts, updatedAt: ts },
       { id: 'eu-2', startDate: '2026-03-01', endDate: '2026-09-30', countries: ['de', 'at', 'ch'], languages: ['de'], createdAt: ts, updatedAt: ts },
@@ -40,7 +40,7 @@ export const DEMO_SETS: DemoSet[] = [
     ],
   },
   {
-    name: 'Asia Pacific',
+    name: 'FTLUNC0003',
     schedulings: [
       { id: 'ap-1', startDate: '2026-01-01', endDate: '2026-06-30', countries: ['jp'], languages: ['ja'], createdAt: ts, updatedAt: ts },
       { id: 'ap-2', startDate: '2026-03-01', endDate: '2026-12-31', countries: ['kr'], languages: ['ko'], createdAt: ts, updatedAt: ts },
@@ -51,7 +51,7 @@ export const DEMO_SETS: DemoSet[] = [
     ],
   },
   {
-    name: 'Global Mix',
+    name: 'FTLUNC0004',
     schedulings: [
       { id: 'gl-1', startDate: '2026-01-01', endDate: '2026-06-30', countries: ['us', 'ca'], languages: ['en-us', 'es-us'], createdAt: ts, updatedAt: ts },
       { id: 'gl-2', startDate: '2026-03-01', endDate: '2026-09-30', countries: ['gb', 'ie'], languages: ['en-gb'], createdAt: ts, updatedAt: ts },
