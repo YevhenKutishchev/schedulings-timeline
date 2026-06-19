@@ -283,6 +283,33 @@ If `au` was the only country in a scheduling, the entire scheduling is deleted.
 
 ---
 
+### 8. Removing a language from multiple countries where some lose all languages → country disappears
+
+**Initial state:**
+```json
+[
+  { "startDate": "2026-01-01", "endDate": "2100-12-31", "countries": ["us", "ca"], "languages": ["en-us", "es"] },
+  { "startDate": "2026-01-01", "endDate": "2100-12-31", "countries": ["mx"],       "languages": ["es"] }
+]
+```
+
+**Operation:** Remove language `["es"]` from `["us", "ca", "mx"]` starting `2027-01-01`.
+
+- `us`, `ca` → `["en-us", "es"] \ ["es"]` = `["en-us"]` — still have languages, remain active
+- `mx` → `["es"] \ ["es"]` = `[]` — no languages left, country disappears entirely
+
+```json
+[
+  { "startDate": "2026-01-01", "endDate": "2026-12-31", "countries": ["us", "ca"], "languages": ["en-us", "es"] },
+  { "startDate": "2026-01-01", "endDate": "2026-12-31", "countries": ["mx"],       "languages": ["es"] },
+  { "startDate": "2027-01-01", "endDate": "2100-12-31", "countries": ["us", "ca"], "languages": ["en-us"] }
+]
+```
+
+`mx` produces no entry from `2027-01-01` onwards — it simply ceases to exist.
+
+---
+
 ## Add Operation Algorithm
 
 Adds countries with a given set of languages to the timeline for a specified date range.
@@ -343,6 +370,67 @@ addToTimeline(schedulings, { startDate, endDate, countries, languages }):
 ```
 
 `mergeAdjacent`: if two schedulings have the same `countries` and `languages`, and one ends the day before the other starts — combine them into one.
+
+---
+
+## Remove Operation Algorithm
+
+Removes specified languages from specified countries for a given date range.
+If a country ends up with no languages remaining, it is dropped entirely from that period.
+
+### Key distinction
+
+Unlike `addToTimeline`, there is no "new country" case — removing from a country that has no existing scheduling for that period is a no-op.
+
+When `remainingLangs` is empty for a country → that country simply produces no output entry (silently removed). See **Example 8**.
+
+### Pseudocode
+
+```
+removeFromTimeline(schedulings, { startDate, endDate, countries, languages }):
+
+  affected   = schedulings that overlap [startDate, endDate]
+  unaffected = the rest (unchanged)
+  result     = []
+
+  for each S in affected:
+
+    // Part BEFORE the operation — unchanged
+    if S.startDate < startDate:
+      result.push({ ...S, endDate: startDate - 1day })
+
+    overlapStart = max(S.startDate, startDate)
+    overlapEnd   = min(S.endDate, endDate)
+
+    inOperation    = S.countries ∩ countries   // exist in both S and the operation
+    notInOperation = S.countries \ countries   // only in S, not affected
+
+    if inOperation is not empty:
+      remainingLangs = S.languages \ languages  // languages that survive the removal
+
+      // Countries outside the operation always keep their languages
+      if notInOperation is not empty:
+        result.push({ overlapStart, overlapEnd, countries: notInOperation, languages: S.languages })
+
+      if remainingLangs is not empty:
+        // Some languages remain — countries stay with a reduced set
+        result.push({ overlapStart, overlapEnd, countries: inOperation, languages: remainingLangs })
+      // else: remainingLangs is empty → inOperation countries disappear entirely,
+      //       no entry is created for them
+
+    else:
+      // No countries from the operation in this scheduling — unchanged
+      result.push({ overlapStart, overlapEnd, countries: S.countries, languages: S.languages })
+
+    // Part AFTER the operation — unchanged
+    if S.endDate > endDate:
+      result.push({ ...S, startDate: endDate + 1day })
+
+  // Merge adjacent schedulings with identical countries and languages
+  result = mergeAdjacent([...unaffected, ...result])
+
+  return result
+```
 
 ---
 
