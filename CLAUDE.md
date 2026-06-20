@@ -36,7 +36,9 @@ load effect could read it.
 | `src/constants.ts` | Shared constants (e.g. `DEFAULT_END_DATE`) |
 | `src/context/SchedulingsContext.tsx` | Global state, CRUD actions, localStorage persistence |
 | `src/utils/timeline.ts` | Pure `addToTimeline` / `removeFromTimeline` algorithms |
-| `src/utils/timeline.test.ts` | Unit tests for the timeline algorithms (16 tests) |
+| `src/utils/diff.ts` | `computeDiff` — compares two scheduling sets for the preview table |
+| `src/utils/timeline.test.ts` | Unit tests for the timeline algorithms (17 tests) |
+| `src/components/TimelineOperation/TimelineOperationDialog.tsx` | 2-step dialog for Add/Remove operations (form → diff preview) |
 | `src/data/countries.ts` | Fixed list of ISO 3166-1 alpha-2 countries |
 | `src/data/languages.ts` | Fixed list of BCP 47 language tags |
 | `src/data/demoSchedulings.ts` | Named demo data sets loaded via the "Demo data" dropdown |
