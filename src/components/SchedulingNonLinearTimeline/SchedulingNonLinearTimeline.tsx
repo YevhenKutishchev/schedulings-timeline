@@ -157,7 +157,12 @@ export function SchedulingNonLinearTimeline({ schedulings, onEdit, onDelete }: P
         {/* Scheduling rows */}
         {schedulings.map((s) => {
           const barLeft = pct(s.startDate);
-          const barRight = pct(s.endDate);
+          // Single-day schedulings (startDate === endDate) map to the same event index,
+          // producing a zero-width bar. Visually extend them by one slot so they remain
+          // legible. One slot = 1/total of the track width.
+          const barRight = s.startDate === s.endDate
+            ? ((dateIndex.get(s.startDate)! + 1.5) / total) * 100
+            : pct(s.endDate);
           const barWidth = Math.max(barRight - barLeft, 0.5);
           const isHovered = hoveredId === s.id;
 
