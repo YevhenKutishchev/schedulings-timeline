@@ -25,7 +25,7 @@ import { COUNTRIES } from '../../data/countries';
 import { LANGUAGES } from '../../data/languages';
 import { MultiAutocomplete } from '../SchedulingForm/MultiAutocomplete';
 import { DEFAULT_END_DATE } from '../../constants';
-import { addToTimeline, type TimelineOperation } from '../../utils/timeline';
+import { addToTimeline, removeFromTimeline, type TimelineOperation } from '../../utils/timeline';
 import { computeDiff, type DiffRow, type DiffStatus } from '../../utils/diff';
 
 const today = () => new Date().toISOString().split('T')[0];
@@ -46,7 +46,27 @@ const countryLabel = (code: string) =>
 const languageLabel = (tag: string) =>
   LANGUAGES.find((l) => l.tag === tag)?.label ?? tag;
 
+export type TimelineOperationMode = 'add' | 'remove';
+
+const MODE_CONFIG: Record<TimelineOperationMode, {
+  title: string;
+  emptyMessage: string;
+  fn: typeof addToTimeline;
+}> = {
+  add: {
+    title: 'Add to Timeline',
+    emptyMessage: 'No changes — the selected countries and languages are already covered for this period.',
+    fn: addToTimeline,
+  },
+  remove: {
+    title: 'Remove from Timeline',
+    emptyMessage: 'No changes — the selected countries and languages are not present in this period.',
+    fn: removeFromTimeline,
+  },
+};
+
 interface Props {
+  mode: TimelineOperationMode;
   open: boolean;
   schedulings: Scheduling[];
   onClose: () => void;
@@ -67,12 +87,11 @@ const emptyForm = (): FormState => ({
   languages: [],
 });
 
-const STATUS_CHIP: Record<DiffStatus, { label: string; color: 'error' | 'success' | 'default' }> =
-  {
-    removed:   { label: 'REMOVED',   color: 'error' },
-    new:       { label: 'NEW',       color: 'success' },
-    unchanged: { label: 'UNCHANGED', color: 'default' },
-  };
+const STATUS_CHIP: Record<DiffStatus, { label: string; color: 'error' | 'success' | 'default' }> = {
+  removed:   { label: 'REMOVED',   color: 'error' },
+  new:       { label: 'NEW',       color: 'success' },
+  unchanged: { label: 'UNCHANGED', color: 'default' },
+};
 
 function ChipList({ items, max = 5 }: { items: string[]; max?: number }) {
   const visible = items.slice(0, max);
@@ -87,12 +106,14 @@ function ChipList({ items, max = 5 }: { items: string[]; max?: number }) {
   );
 }
 
-export function AddToTimelineDialog({ open, schedulings, onClose, onApply }: Props) {
+export function TimelineOperationDialog({ mode, open, schedulings, onClose, onApply }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [diff, setDiff] = useState<DiffRow[]>([]);
   const [preview, setPreview] = useState<Scheduling[]>([]);
+
+  const config = MODE_CONFIG[mode];
 
   useEffect(() => {
     if (open) {
@@ -122,7 +143,7 @@ export function AddToTimelineDialog({ open, schedulings, onClose, onApply }: Pro
       countries: form.countries,
       languages: form.languages,
     };
-    const result = addToTimeline(schedulings, op);
+    const result = config.fn(schedulings, op);
     setPreview(result);
     setDiff(computeDiff(schedulings, result));
     setStep(2);
@@ -139,7 +160,7 @@ export function AddToTimelineDialog({ open, schedulings, onClose, onApply }: Pro
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        {step === 1 ? 'Add Expansion' : 'Preview Changes'}
+        {step === 1 ? config.title : 'Preview Changes'}
       </DialogTitle>
 
       <DialogContent dividers>
@@ -197,7 +218,7 @@ export function AddToTimelineDialog({ open, schedulings, onClose, onApply }: Pro
           <Box>
             {!hasChanges ? (
               <Typography color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
-                No changes — the selected countries and languages are already covered for this period.
+                {config.emptyMessage}
               </Typography>
             ) : (
               <TableContainer>
@@ -222,14 +243,10 @@ export function AddToTimelineDialog({ open, schedulings, onClose, onApply }: Pro
                             {row.startDate} → {row.endDate}
                           </TableCell>
                           <TableCell>
-                            <ChipList
-                              items={row.countries.map(countryLabel)}
-                            />
+                            <ChipList items={row.countries.map(countryLabel)} />
                           </TableCell>
                           <TableCell>
-                            <ChipList
-                              items={row.languages.map(languageLabel)}
-                            />
+                            <ChipList items={row.languages.map(languageLabel)} />
                           </TableCell>
                         </TableRow>
                       );
@@ -238,7 +255,6 @@ export function AddToTimelineDialog({ open, schedulings, onClose, onApply }: Pro
                 </Table>
               </TableContainer>
             )}
-
             {unchangedCount > 0 && (
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
                 {unchangedCount} scheduling{unchangedCount !== 1 ? 's' : ''} unchanged

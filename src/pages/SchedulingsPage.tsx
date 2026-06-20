@@ -12,8 +12,11 @@ import {
   ListItemIcon,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import TimelineIcon from '@mui/icons-material/Timeline';
@@ -23,7 +26,7 @@ import { SchedulingForm } from '../components/SchedulingForm/SchedulingForm';
 import { SchedulingTable } from '../components/SchedulingTable/SchedulingTable';
 import { SchedulingTimeline } from '../components/SchedulingTimeline/SchedulingTimeline';
 import { SchedulingNonLinearTimeline } from '../components/SchedulingNonLinearTimeline/SchedulingNonLinearTimeline';
-import { AddToTimelineDialog } from '../components/AddToTimeline/AddToTimelineDialog';
+import { TimelineOperationDialog, type TimelineOperationMode } from '../components/TimelineOperation/TimelineOperationDialog';
 import { DEMO_SETS } from '../data/demoSchedulings';
 import type { Scheduling, SchedulingDraft } from '../types/scheduling';
 
@@ -36,7 +39,9 @@ export function SchedulingsPage() {
   const [editing, setEditing] = useState<Scheduling | undefined>();
   const [demoAnchor, setDemoAnchor] = useState<HTMLElement | null>(null);
   const [activeDemoName, setActiveDemoName] = useState<string | null>(null);
-  const [addToTimelineOpen, setAddToTimelineOpen] = useState(false);
+  const [editAnchor, setEditAnchor] = useState<HTMLElement | null>(null);
+  const [timelineOpMode, setTimelineOpMode] = useState<TimelineOperationMode>('add');
+  const [timelineOpOpen, setTimelineOpOpen] = useState(false);
 
   function handleSubmit(draft: SchedulingDraft) {
     if (editing) {
@@ -63,6 +68,12 @@ export function SchedulingsPage() {
     reset(set.schedulings);
     setActiveDemoName(set.name);
     setDemoAnchor(null);
+  }
+
+  function openTimelineOp(mode: TimelineOperationMode) {
+    setTimelineOpMode(mode);
+    setEditAnchor(null);
+    setTimelineOpOpen(true);
   }
 
   return (
@@ -124,14 +135,36 @@ export function SchedulingsPage() {
           </Menu>
 
           <Divider orientation="vertical" flexItem />
+
           <Button
             variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() => setAddToTimelineOpen(true)}
+            startIcon={<EditIcon />}
+            endIcon={<ArrowDropDownIcon />}
+            onClick={(e) => setEditAnchor(e.currentTarget)}
             disabled={schedulings.length === 0}
           >
-            Add Expansion
+            Edit Timeline
           </Button>
+          <Menu
+            anchorEl={editAnchor}
+            open={Boolean(editAnchor)}
+            onClose={() => setEditAnchor(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          >
+            <MenuItem onClick={() => openTimelineOp('add')}>
+              <ListItemIcon>
+                <PlaylistAddIcon fontSize="small" color="success" />
+              </ListItemIcon>
+              <ListItemText primary="Add to Timeline" />
+            </MenuItem>
+            <MenuItem onClick={() => openTimelineOp('remove')}>
+              <ListItemIcon>
+                <PlaylistRemoveIcon fontSize="small" color="error" />
+              </ListItemIcon>
+              <ListItemText primary="Remove from Timeline" />
+            </MenuItem>
+          </Menu>
+
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -159,13 +192,14 @@ export function SchedulingsPage() {
         onSubmit={handleSubmit}
       />
 
-      <AddToTimelineDialog
-        open={addToTimelineOpen}
+      <TimelineOperationDialog
+        mode={timelineOpMode}
+        open={timelineOpOpen}
         schedulings={schedulings}
-        onClose={() => setAddToTimelineOpen(false)}
+        onClose={() => setTimelineOpOpen(false)}
         onApply={(result) => {
           reset(result);
-          setAddToTimelineOpen(false);
+          setTimelineOpOpen(false);
         }}
       />
     </>
