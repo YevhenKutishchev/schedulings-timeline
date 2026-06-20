@@ -23,6 +23,7 @@ import { SchedulingForm } from '../components/SchedulingForm/SchedulingForm';
 import { SchedulingTable } from '../components/SchedulingTable/SchedulingTable';
 import { SchedulingTimeline } from '../components/SchedulingTimeline/SchedulingTimeline';
 import { SchedulingNonLinearTimeline } from '../components/SchedulingNonLinearTimeline/SchedulingNonLinearTimeline';
+import { AddToTimelineDialog } from '../components/AddToTimeline/AddToTimelineDialog';
 import { DEMO_SETS } from '../data/demoSchedulings';
 import type { Scheduling, SchedulingDraft } from '../types/scheduling';
 
@@ -35,6 +36,7 @@ export function SchedulingsPage() {
   const [editing, setEditing] = useState<Scheduling | undefined>();
   const [demoAnchor, setDemoAnchor] = useState<HTMLElement | null>(null);
   const [activeDemoName, setActiveDemoName] = useState<string | null>(null);
+  const [addToTimelineOpen, setAddToTimelineOpen] = useState(false);
 
   function handleSubmit(draft: SchedulingDraft) {
     if (editing) {
@@ -123,6 +125,14 @@ export function SchedulingsPage() {
 
           <Divider orientation="vertical" flexItem />
           <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={() => setAddToTimelineOpen(true)}
+            disabled={schedulings.length === 0}
+          >
+            Add Expansion
+          </Button>
+          <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setFormOpen(true)}
@@ -147,6 +157,16 @@ export function SchedulingsPage() {
         initial={editing}
         onClose={handleClose}
         onSubmit={handleSubmit}
+      />
+
+      <AddToTimelineDialog
+        open={addToTimelineOpen}
+        schedulings={schedulings}
+        onClose={() => setAddToTimelineOpen(false)}
+        onApply={(result) => {
+          reset(result);
+          setAddToTimelineOpen(false);
+        }}
       />
     </>
   );

@@ -165,6 +165,21 @@ describe('addToTimeline', () => {
       mk('2026-01-01', '2100-12-31', ['us'], ['en-us', 'es']),
     ]));
   });
+
+  it('does not split scheduling when adding a country that already exists with the same languages', () => {
+    // Regression: ca+fi already covered in S2; operation should produce no diff
+    const initial = [
+      mk('2026-06-19', '2100-12-31', ['ar', 'au', 'at', 'be', 'br'], ['ar', 'zh-cn', 'zh-tw', 'cs']),
+      mk('2028-01-01', '2100-12-31', ['br', 'ca'], ['fi']),
+    ];
+    const result = addToTimeline(initial, {
+      startDate: '2028-01-01',
+      endDate: '2100-12-31',
+      countries: ['ca'],
+      languages: ['fi'],
+    });
+    expect(norm(result)).toEqual(norm(initial));
+  });
 });
 
 // ---------------------------------------------------------------------------

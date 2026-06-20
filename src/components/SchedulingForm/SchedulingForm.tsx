@@ -12,6 +12,7 @@ import type { Scheduling, SchedulingDraft } from '../../types/scheduling';
 import { COUNTRIES } from '../../data/countries';
 import { LANGUAGES } from '../../data/languages';
 import { MultiAutocomplete } from './MultiAutocomplete';
+import { DEFAULT_END_DATE } from '../../constants';
 
 interface Props {
   open: boolean;
@@ -24,7 +25,7 @@ const today = () => new Date().toISOString().split('T')[0];
 
 const emptyDraft = (): SchedulingDraft => ({
   startDate: today(),
-  endDate: '2100-12-31',
+  endDate: DEFAULT_END_DATE,
   countries: [],
   languages: [],
 });

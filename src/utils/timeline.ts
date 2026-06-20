@@ -71,19 +71,41 @@ function make(
 }
 
 // ---------------------------------------------------------------------------
+// mergeByPeriod
+//
+// Schedulings with the same (startDate, endDate, languages) are combined
+// into one entry — their countries are unioned.
+// Handles cases where an operation produces [br]|[fi] and [ca]|[fi] for
+// the same period; they should collapse into a single [br,ca]|[fi] entry.
+// ---------------------------------------------------------------------------
+
+function mergeByPeriod(schedulings: Scheduling[]): Scheduling[] {
+  const byPeriod = new Map<string, { countries: Set<string>; ref: Scheduling }>();
+  for (const s of schedulings) {
+    const key = `${s.startDate}|${s.endDate}|${[...s.languages].sort().join(',')}`;
+    const existing = byPeriod.get(key);
+    if (existing) {
+      s.countries.forEach((c) => existing.countries.add(c));
+    } else {
+      byPeriod.set(key, { countries: new Set(s.countries), ref: s });
+    }
+  }
+  return [...byPeriod.values()].map(({ countries, ref }) =>
+    make(ref.startDate, ref.endDate, [...countries], ref.languages),
+  );
+}
+
+// ---------------------------------------------------------------------------
 // mergeAdjacent
 //
-// Groups schedulings by (sorted countries, sorted languages) fingerprint.
-// Within each group, sorts by startDate and merges consecutive date ranges
-// where one ends the day before the next starts.
+// Schedulings with the same (countries, languages) whose date ranges are
+// consecutive (one ends the day before the next starts) are merged into one.
 // ---------------------------------------------------------------------------
 
 function mergeAdjacent(schedulings: Scheduling[]): Scheduling[] {
   const groups = new Map<string, Scheduling[]>();
-
   for (const s of schedulings) {
-    const key =
-      [...s.countries].sort().join(',') + '|' + [...s.languages].sort().join(',');
+    const key = [...s.countries].sort().join(',') + '|' + [...s.languages].sort().join(',');
     const group = groups.get(key);
     if (group) {
       group.push(s);
@@ -93,11 +115,9 @@ function mergeAdjacent(schedulings: Scheduling[]): Scheduling[] {
   }
 
   const result: Scheduling[] = [];
-
   for (const group of groups.values()) {
     const sorted = [...group].sort((a, b) => a.startDate.localeCompare(b.startDate));
     let current = { ...sorted[0] };
-
     for (let i = 1; i < sorted.length; i++) {
       if (dayAfter(current.endDate) === sorted[i].startDate) {
         current = { ...current, endDate: sorted[i].endDate };
@@ -114,6 +134,17 @@ function mergeAdjacent(schedulings: Scheduling[]): Scheduling[] {
       a.startDate.localeCompare(b.startDate) ||
       [...a.countries].sort().join().localeCompare([...b.countries].sort().join()),
   );
+}
+
+// ---------------------------------------------------------------------------
+// normalize
+//
+// Applies mergeByPeriod then mergeAdjacent to produce a fully normalized
+// scheduling set with no redundant entries.
+// ---------------------------------------------------------------------------
+
+function normalize(schedulings: Scheduling[]): Scheduling[] {
+  return mergeAdjacent(mergeByPeriod(schedulings));
 }
 
 // ---------------------------------------------------------------------------
@@ -169,7 +200,7 @@ export function addToTimeline(
     result.push(make(op.startDate, op.endDate, newCountries, op.languages));
   }
 
-  return mergeAdjacent([...unaffected, ...result]);
+  return normalize([...unaffected, ...result]);
 }
 
 // ---------------------------------------------------------------------------
@@ -220,7 +251,7 @@ export function removeFromTimeline(
     }
   }
 
-  return mergeAdjacent([...unaffected, ...result]);
+  return normalize([...unaffected, ...result]);
 }
 
 // ---------------------------------------------------------------------------
