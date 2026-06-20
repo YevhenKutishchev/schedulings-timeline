@@ -9,8 +9,6 @@ A React application for creating, editing, and visualizing **Schedulings** — d
 * Add action-based editing.
   * Add the possibility to add/remove languages to all active territories in a specified time interval.
   * When users add or remove something, we probably need to give them a hint on what is active on a start date.
-  * addToTimeline function's ([docs/SCHEDULING_CONCEPT.md](docs/SCHEDULING_CONCEPT.md)) algorithm doesn't merge territory 
-    groups with the same language sets. Decided to not to add it before draft/published statuses added to schedulings.
 * Think about a user-friendly way to display diffs. What countries/languages were added/removed on a specific date.
 * In the Add to Timeline diff view: decide whether to show REMOVED + NEW rows separately, or try to pair them as MODIFIED (this scheduling was split into these). Currently showing REMOVED + NEW.
 * Add status fields (draft/published) to schedulings. At the moment schedulings don't have a status field, so there is no such thing as publishing schedulings.

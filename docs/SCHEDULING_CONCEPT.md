@@ -363,13 +363,17 @@ addToTimeline(schedulings, { startDate, endDate, countries, languages }):
   if newCountries is not empty:
     result.push({ startDate, endDate, countries: newCountries, languages })
 
-  // Merge adjacent schedulings with identical countries and languages
-  result = mergeAdjacent([...unaffected, ...result])
+  // Normalize the result
+  result = normalize([...unaffected, ...result])
 
   return result
 ```
 
-`mergeAdjacent`: if two schedulings have the same `countries` and `languages`, and one ends the day before the other starts — combine them into one.
+`normalize` runs two passes in sequence:
+
+1. **`mergeByPeriod`** — schedulings with the same `(startDate, endDate, languages)` are collapsed into one by unioning their countries. Handles the case where an operation splits a scheduling into `[br]|[fi]` and `[ca]|[fi]` for the same period — they should be a single `[br,ca]|[fi]` entry.
+
+2. **`mergeAdjacent`** — schedulings with the same `(countries, languages)` whose date ranges are consecutive (one ends the day before the next starts) are merged into one.
 
 ---
 
@@ -426,11 +430,13 @@ removeFromTimeline(schedulings, { startDate, endDate, countries, languages }):
     if S.endDate > endDate:
       result.push({ ...S, startDate: endDate + 1day })
 
-  // Merge adjacent schedulings with identical countries and languages
-  result = mergeAdjacent([...unaffected, ...result])
+  // Normalize the result
+  result = normalize([...unaffected, ...result])
 
   return result
 ```
+
+`normalize` is the same two-pass function described in the Add Expansion Algorithm above.
 
 ---
 
