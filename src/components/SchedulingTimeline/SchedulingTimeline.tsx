@@ -14,6 +14,7 @@ import dayjs from 'dayjs';
 import type { Scheduling } from '../../types/scheduling';
 import { COUNTRIES } from '../../data/countries';
 import { LANGUAGES } from '../../data/languages';
+import { filterItems } from '../../utils/filters';
 
 const LEFT_PANEL = 220;
 const ROW_HEIGHT = 48;
@@ -28,11 +29,19 @@ const languageLabel = (tag: string) =>
 
 interface Props {
   schedulings: Scheduling[];
+  filterCountries?: string[];
+  filterLanguages?: string[];
   onEdit: (s: Scheduling) => void;
   onDelete: (id: string) => void;
 }
 
-export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
+export function SchedulingTimeline({
+  schedulings,
+  filterCountries = [],
+  filterLanguages = [],
+  onEdit,
+  onDelete,
+}: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   if (schedulings.length === 0) {
@@ -138,6 +147,10 @@ export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
           const barRight = pct(dayjs(s.endDate));
           const barWidth = Math.max(barRight - barLeft, 0.5);
           const isHovered = hoveredId === s.id;
+          const { visible: visibleCountries, hiddenCount: hiddenCountries } =
+            filterItems(s.countries, filterCountries);
+          const { visible: visibleLanguages, hiddenCount: hiddenLanguages } =
+            filterItems(s.languages, filterLanguages);
 
           return (
             <Box
@@ -172,11 +185,14 @@ export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
                     {s.startDate} – {s.endDate}
                   </Typography>
                   <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.25, mt: 0.25 }}>
-                    {s.countries.slice(0, 3).map((c) => (
+                    {visibleCountries.slice(0, 3).map((c) => (
                       <Chip key={c} label={c.toUpperCase()} size="small" sx={{ height: 16, fontSize: 10 }} />
                     ))}
-                    {s.countries.length > 3 && (
-                      <Chip label={`+${s.countries.length - 3}`} size="small" sx={{ height: 16, fontSize: 10 }} />
+                    {visibleCountries.length > 3 && (
+                      <Chip label={`+${visibleCountries.length - 3}`} size="small" sx={{ height: 16, fontSize: 10 }} />
+                    )}
+                    {hiddenCountries > 0 && (
+                      <Chip label={`${hiddenCountries} filtered`} size="small" sx={{ height: 16, fontSize: 10, color: 'text.disabled', borderColor: 'divider' }} variant="outlined" />
                     )}
                   </Stack>
                 </Box>
@@ -233,10 +249,12 @@ export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
                         {s.startDate} → {s.endDate}
                       </Typography>
                       <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
-                        Countries: {s.countries.map(countryLabel).join(', ')}
+                        Countries: {visibleCountries.map(countryLabel).join(', ')}
+                        {hiddenCountries > 0 && ` (${hiddenCountries} filtered out)`}
                       </Typography>
                       <Typography variant="caption" sx={{ display: 'block' }}>
-                        Languages: {s.languages.map(languageLabel).join(', ')}
+                        Languages: {visibleLanguages.map(languageLabel).join(', ')}
+                        {hiddenLanguages > 0 && ` (${hiddenLanguages} filtered out)`}
                       </Typography>
                     </Box>
                   }
@@ -266,7 +284,7 @@ export function SchedulingTimeline({ schedulings, onEdit, onDelete }: Props) {
                       noWrap
                       sx={{ fontSize: 10 }}
                     >
-                      {s.languages.map((t) => t).join(', ')}
+                      {visibleLanguages.join(', ')}
                     </Typography>
                   </Box>
                 </Tooltip>

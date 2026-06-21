@@ -27,7 +27,9 @@ import { SchedulingTable } from '../components/SchedulingTable/SchedulingTable';
 import { SchedulingTimeline } from '../components/SchedulingTimeline/SchedulingTimeline';
 import { SchedulingNonLinearTimeline } from '../components/SchedulingNonLinearTimeline/SchedulingNonLinearTimeline';
 import { TimelineOperationDialog, type TimelineOperationMode } from '../components/TimelineOperation/TimelineOperationDialog';
+import { SchedulingFilters } from '../components/SchedulingFilters/SchedulingFilters';
 import { DEMO_SETS } from '../data/demoSchedulings';
+import { applyFilters } from '../utils/filters';
 import type { Scheduling, SchedulingDraft } from '../types/scheduling';
 
 type ViewMode = 'table' | 'timeline' | 'nonlinear';
@@ -42,6 +44,8 @@ export function SchedulingsPage() {
   const [editAnchor, setEditAnchor] = useState<HTMLElement | null>(null);
   const [timelineOpMode, setTimelineOpMode] = useState<TimelineOperationMode>('add');
   const [timelineOpOpen, setTimelineOpOpen] = useState(false);
+  const [filterCountries, setFilterCountries] = useState<string[]>([]);
+  const [filterLanguages, setFilterLanguages] = useState<string[]>([]);
 
   function handleSubmit(draft: SchedulingDraft) {
     if (editing) {
@@ -66,6 +70,8 @@ export function SchedulingsPage() {
   function handleDemoSelect(index: number) {
     const set = DEMO_SETS[index];
     reset(set.schedulings);
+    setFilterCountries([]);
+    setFilterLanguages([]);
     setActiveDemoName(set.name);
     setDemoAnchor(null);
   }
@@ -75,6 +81,10 @@ export function SchedulingsPage() {
     setEditAnchor(null);
     setTimelineOpOpen(true);
   }
+
+  const availableCountries = [...new Set(schedulings.flatMap((s) => s.countries))].sort();
+  const availableLanguages = [...new Set(schedulings.flatMap((s) => s.languages))].sort();
+  const filteredSchedulings = applyFilters(schedulings, filterCountries, filterLanguages);
 
   return (
     <>
@@ -175,14 +185,43 @@ export function SchedulingsPage() {
         </Stack>
       </Stack>
 
+      {schedulings.length > 0 && (
+        <SchedulingFilters
+          availableCountries={availableCountries}
+          availableLanguages={availableLanguages}
+          filterCountries={filterCountries}
+          filterLanguages={filterLanguages}
+          onCountriesChange={setFilterCountries}
+          onLanguagesChange={setFilterLanguages}
+        />
+      )}
+
       {view === 'table' && (
-        <SchedulingTable schedulings={schedulings} onEdit={handleEdit} onDelete={remove} />
+        <SchedulingTable
+          schedulings={filteredSchedulings}
+          filterCountries={filterCountries}
+          filterLanguages={filterLanguages}
+          onEdit={handleEdit}
+          onDelete={remove}
+        />
       )}
       {view === 'timeline' && (
-        <SchedulingTimeline schedulings={schedulings} onEdit={handleEdit} onDelete={remove} />
+        <SchedulingTimeline
+          schedulings={filteredSchedulings}
+          filterCountries={filterCountries}
+          filterLanguages={filterLanguages}
+          onEdit={handleEdit}
+          onDelete={remove}
+        />
       )}
       {view === 'nonlinear' && (
-        <SchedulingNonLinearTimeline schedulings={schedulings} onEdit={handleEdit} onDelete={remove} />
+        <SchedulingNonLinearTimeline
+          schedulings={filteredSchedulings}
+          filterCountries={filterCountries}
+          filterLanguages={filterLanguages}
+          onEdit={handleEdit}
+          onDelete={remove}
+        />
       )}
 
       <SchedulingForm
