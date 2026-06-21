@@ -191,7 +191,7 @@ export function SchedulingsPage() {
         </Stack>
       </Stack>
 
-      {schedulings.length > 0 && (
+      {schedulings.length > 0 && view !== 'changelog' && (
         <SchedulingFilters
           availableCountries={availableCountries}
           availableLanguages={availableLanguages}
