@@ -269,11 +269,7 @@ export function SchedulingsPage() {
         />
       )}
       {view === 'changelog' && (
-        <SchedulingChangelog
-          schedulings={schedulings}
-          filterCountries={filterCountries}
-          filterLanguages={filterLanguages}
-        />
+        <SchedulingChangelog schedulings={schedulings} />
       )}
 
       <SchedulingForm
