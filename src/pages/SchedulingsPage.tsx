@@ -21,18 +21,20 @@ import CheckIcon from '@mui/icons-material/Check';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import ScatterPlotIcon from '@mui/icons-material/ScatterPlot';
+import ChangeHistoryIcon from '@mui/icons-material/ChangeHistory';
 import { useSchedulings } from '../context/SchedulingsContext';
 import { SchedulingForm } from '../components/SchedulingForm/SchedulingForm';
 import { SchedulingTable } from '../components/SchedulingTable/SchedulingTable';
 import { SchedulingTimeline } from '../components/SchedulingTimeline/SchedulingTimeline';
 import { SchedulingNonLinearTimeline } from '../components/SchedulingNonLinearTimeline/SchedulingNonLinearTimeline';
+import { SchedulingChangelog } from '../components/SchedulingChangelog/SchedulingChangelog';
 import { TimelineOperationDialog, type TimelineOperationMode } from '../components/TimelineOperation/TimelineOperationDialog';
 import { SchedulingFilters } from '../components/SchedulingFilters/SchedulingFilters';
 import { DEMO_SETS } from '../data/demoSchedulings';
 import { applyFilters } from '../utils/filters';
 import type { Scheduling, SchedulingDraft } from '../types/scheduling';
 
-type ViewMode = 'table' | 'timeline' | 'nonlinear';
+type ViewMode = 'table' | 'timeline' | 'nonlinear' | 'changelog';
 
 export function SchedulingsPage() {
   const { schedulings, add, update, remove, reset } = useSchedulings();
@@ -101,7 +103,11 @@ export function SchedulingsPage() {
           >
             <ToggleButton value="table">
               <TableRowsIcon fontSize="small" sx={{ mr: 0.5 }} />
-              Table
+              Schedulings
+            </ToggleButton>
+            <ToggleButton value="changelog">
+              <ChangeHistoryIcon fontSize="small" sx={{ mr: 0.5 }} />
+              Changes
             </ToggleButton>
             <ToggleButton value="timeline">
               <TimelineIcon fontSize="small" sx={{ mr: 0.5 }} />
@@ -221,6 +227,13 @@ export function SchedulingsPage() {
           filterLanguages={filterLanguages}
           onEdit={handleEdit}
           onDelete={remove}
+        />
+      )}
+      {view === 'changelog' && (
+        <SchedulingChangelog
+          schedulings={schedulings}
+          filterCountries={filterCountries}
+          filterLanguages={filterLanguages}
         />
       )}
 
