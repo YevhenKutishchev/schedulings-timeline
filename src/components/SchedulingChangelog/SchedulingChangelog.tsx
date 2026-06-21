@@ -1,5 +1,9 @@
+import { useState } from 'react';
 import {
+  Box,
+  Checkbox,
   Chip,
+  FormControlLabel,
   Paper,
   Stack,
   Table,
@@ -34,6 +38,8 @@ export function SchedulingChangelog({
   filterCountries = [],
   filterLanguages = [],
 }: Props) {
+  const [countOnly, setCountOnly] = useState(false);
+
   if (schedulings.length === 0) {
     return (
       <Typography color="text.secondary" sx={{ mt: 4, textAlign: 'center' }}>
@@ -70,6 +76,20 @@ export function SchedulingChangelog({
   }
 
   return (
+    <Box>
+      <Box sx={{ mb: 1.5 }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={countOnly}
+              onChange={(e) => setCountOnly(e.target.checked)}
+              size="small"
+            />
+          }
+          label="Count only"
+        />
+      </Box>
+
     <TableContainer component={Paper} variant="outlined">
       <Table size="small">
         <TableHead>
@@ -87,6 +107,7 @@ export function SchedulingChangelog({
                 filterItems(row.countries, filterCountries);
               const { visible: visibleLanguages, hiddenCount: hiddenLanguages } =
                 filterItems(row.languages, filterLanguages);
+              const sign = row.type === 'added' ? '+' : '-';
 
               return (
                 <TableRow
@@ -113,40 +134,60 @@ export function SchedulingChangelog({
                     />
                   </TableCell>
                   <TableCell>
-                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
-                      {visibleCountries.map((c) => (
-                        <Chip key={c} label={countryLabel(c)} size="small" variant="outlined" />
-                      ))}
-                      {hiddenCountries > 0 && (
-                        <Chip
-                          label={`${hiddenCountries} filtered out`}
-                          size="small"
-                          variant="outlined"
-                          sx={{ color: 'text.disabled', borderColor: 'divider' }}
-                        />
-                      )}
-                    </Stack>
+                    {countOnly ? (
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 600, color: row.type === 'added' ? 'success.main' : 'error.main' }}
+                      >
+                        {sign}{visibleCountries.length}
+                        {hiddenCountries > 0 && ` (${hiddenCountries} filtered out)`}
+                      </Typography>
+                    ) : (
+                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                        {visibleCountries.map((c) => (
+                          <Chip key={c} label={countryLabel(c)} size="small" variant="outlined" />
+                        ))}
+                        {hiddenCountries > 0 && (
+                          <Chip
+                            label={`${hiddenCountries} filtered out`}
+                            size="small"
+                            variant="outlined"
+                            sx={{ color: 'text.disabled', borderColor: 'divider' }}
+                          />
+                        )}
+                      </Stack>
+                    )}
                   </TableCell>
                   <TableCell>
-                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
-                      {visibleLanguages.map((l) => (
-                        <Chip
-                          key={l}
-                          label={languageLabel(l)}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                        />
-                      ))}
-                      {hiddenLanguages > 0 && (
-                        <Chip
-                          label={`${hiddenLanguages} filtered out`}
-                          size="small"
-                          variant="outlined"
-                          sx={{ color: 'text.disabled', borderColor: 'divider' }}
-                        />
-                      )}
-                    </Stack>
+                    {countOnly ? (
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 600, color: row.type === 'added' ? 'success.main' : 'error.main' }}
+                      >
+                        {sign}{visibleLanguages.length}
+                        {hiddenLanguages > 0 && ` (${hiddenLanguages} filtered out)`}
+                      </Typography>
+                    ) : (
+                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                        {visibleLanguages.map((l) => (
+                          <Chip
+                            key={l}
+                            label={languageLabel(l)}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        ))}
+                        {hiddenLanguages > 0 && (
+                          <Chip
+                            label={`${hiddenLanguages} filtered out`}
+                            size="small"
+                            variant="outlined"
+                            sx={{ color: 'text.disabled', borderColor: 'divider' }}
+                          />
+                        )}
+                      </Stack>
+                    )}
                   </TableCell>
                 </TableRow>
               );
@@ -155,5 +196,6 @@ export function SchedulingChangelog({
         </TableBody>
       </Table>
     </TableContainer>
+    </Box>
   );
 }
