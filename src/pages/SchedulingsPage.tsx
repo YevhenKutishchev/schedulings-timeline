@@ -1,23 +1,27 @@
 import { useState } from 'react';
 import {
   Button,
+  IconButton,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  Divider,
   Menu,
   MenuItem,
   ListItemText,
   ListItemIcon,
+  Tooltip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import ScatterPlotIcon from '@mui/icons-material/ScatterPlot';
@@ -48,6 +52,14 @@ export function SchedulingsPage() {
   const [timelineOpOpen, setTimelineOpOpen] = useState(false);
   const [filterCountries, setFilterCountries] = useState<string[]>([]);
   const [filterLanguages, setFilterLanguages] = useState<string[]>([]);
+  const [copied, setCopied] = useState(false);
+  const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null);
+
+  function handleCopyJson() {
+    navigator.clipboard.writeText(JSON.stringify(schedulings, null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   function handleSubmit(draft: SchedulingDraft) {
     if (editing) {
@@ -90,11 +102,12 @@ export function SchedulingsPage() {
 
   return (
     <>
-      <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
-          Schedulings
-        </Typography>
-        <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+      <Stack spacing={1.5} sx={{ mb: 3 }}>
+        {/* Row 1: title + view toggle */}
+        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            Schedulings
+          </Typography>
           <ToggleButtonGroup
             value={view}
             exclusive
@@ -118,7 +131,10 @@ export function SchedulingsPage() {
               Non-linear
             </ToggleButton>
           </ToggleButtonGroup>
+        </Stack>
 
+        {/* Row 2: data actions + ··· dev tools */}
+        <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'flex-end' }}>
           <Button
             variant="outlined"
             size="small"
@@ -150,10 +166,9 @@ export function SchedulingsPage() {
             })}
           </Menu>
 
-          <Divider orientation="vertical" flexItem />
-
           <Button
             variant="outlined"
+            size="small"
             startIcon={<EditIcon />}
             endIcon={<ArrowDropDownIcon />}
             onClick={(e) => setEditAnchor(e.currentTarget)}
@@ -183,11 +198,35 @@ export function SchedulingsPage() {
 
           <Button
             variant="contained"
+            size="small"
             startIcon={<AddIcon />}
             onClick={() => setFormOpen(true)}
           >
             New Scheduling
           </Button>
+
+          <Tooltip title="Developer tools">
+            <IconButton size="small" onClick={(e) => setMoreAnchor(e.currentTarget)}>
+              <MoreHorizIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Menu
+            anchorEl={moreAnchor}
+            open={Boolean(moreAnchor)}
+            onClose={() => setMoreAnchor(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <MenuItem
+              onClick={() => { handleCopyJson(); setMoreAnchor(null); }}
+              disabled={schedulings.length === 0}
+            >
+              <ListItemIcon>
+                {copied ? <CheckCircleIcon fontSize="small" color="success" /> : <ContentCopyIcon fontSize="small" />}
+              </ListItemIcon>
+              <ListItemText primary={copied ? 'Copied!' : 'Copy Schedulings JSON'} />
+            </MenuItem>
+          </Menu>
         </Stack>
       </Stack>
 
