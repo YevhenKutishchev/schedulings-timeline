@@ -79,9 +79,16 @@ export type ChangeTypeV2 =
   | 'languages_added'      // country was already active and gained these languages
   | 'languages_removed';   // country was already active and lost these languages (still active)
 
+export interface CountryDiff {
+  country: string;
+  langsBefore: number; // language count before this event
+  langsAfter: number;  // language count after this event
+}
+
 export interface ChangeRowV2 {
   type: ChangeTypeV2;
-  countries: string[];
+  countries: string[];       // sorted list for display / grouping
+  countryDiffs: CountryDiff[]; // per-country before/after counts for the diff view
   languages: string[];
 }
 
@@ -91,8 +98,7 @@ export interface ChangeEventV2 {
 }
 
 function diffStatesV2(prev: StateMap, curr: StateMap): ChangeRowV2[] {
-  // Accumulate groups keyed by (type, sorted-lang-key)
-  const groups = new Map<string, { type: ChangeTypeV2; countries: string[] }>();
+  const groups = new Map<string, { type: ChangeTypeV2; diffs: CountryDiff[] }>();
 
   const allCountries = new Set([...prev.keys(), ...curr.keys()]);
 
@@ -105,8 +111,8 @@ function diffStatesV2(prev: StateMap, curr: StateMap): ChangeRowV2[] {
 
     const push = (type: ChangeTypeV2, langs: string[]) => {
       const key = `${type}|${[...langs].sort().join(',')}`;
-      const g = groups.get(key) ?? { type, countries: [] };
-      g.countries.push(country);
+      const g = groups.get(key) ?? { type, diffs: [] };
+      g.diffs.push({ country, langsBefore: prevLangs.size, langsAfter: currLangs.size });
       groups.set(key, g);
     };
 
@@ -130,11 +136,15 @@ function diffStatesV2(prev: StateMap, curr: StateMap): ChangeRowV2[] {
   };
 
   return [...groups.entries()]
-    .map(([key, { type, countries }]) => ({
-      type,
-      countries: countries.sort(),
-      languages: key.split('|')[1].split(',').filter(Boolean),
-    }))
+    .map(([key, { type, diffs }]) => {
+      const sorted = [...diffs].sort((a, b) => a.country.localeCompare(b.country));
+      return {
+        type,
+        countries: sorted.map((d) => d.country),
+        countryDiffs: sorted,
+        languages: key.split('|')[1].split(',').filter(Boolean),
+      };
+    })
     .sort((a, b) => order[a.type] - order[b.type]);
 }
 

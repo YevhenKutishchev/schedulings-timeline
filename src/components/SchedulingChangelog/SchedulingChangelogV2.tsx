@@ -2,8 +2,10 @@ import { useState } from 'react';
 import {
   Box,
   Button,
+  Checkbox,
   Chip,
   Collapse,
+  FormControlLabel,
   Paper,
   Stack,
   Table,
@@ -12,6 +14,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -21,7 +24,7 @@ import dayjs from 'dayjs';
 import type { Scheduling } from '../../types/scheduling';
 import { COUNTRIES } from '../../data/countries';
 import { LANGUAGES } from '../../data/languages';
-import { computeChangeEventsV2, type ChangeTypeV2 } from '../../utils/changelog';
+import { computeChangeEventsV2, type ChangeTypeV2, type CountryDiff } from '../../utils/changelog';
 
 interface Props {
   schedulings: Scheduling[];
@@ -59,9 +62,35 @@ const TYPE_CONFIG: Record<
   },
 };
 
+function CountryDiffChipLabel({
+  diff,
+  type,
+  changedCount,
+}: {
+  diff: CountryDiff;
+  type: ChangeTypeV2;
+  changedCount: number;
+}) {
+  const isGain = type === 'country_activated' || type === 'languages_added';
+  const sign = isGain ? '+' : '-';
+  const color = isGain ? 'success.main' : 'error.main';
+  return (
+    <span>
+      {countryLabel(diff.country)}{' '}
+      <sup>
+        <Box component="span" sx={{ color, fontWeight: 700 }}>
+          {sign}{changedCount}
+        </Box>
+        {' '}({diff.langsAfter})
+      </sup>
+    </span>
+  );
+}
+
 export function SchedulingChangelogV2({ schedulings }: Props) {
   const [copied, setCopied] = useState(false);
   const [legendOpen, setLegendOpen] = useState(true);
+  const [showDiffByCountry, setShowDiffByCountry] = useState(true);
 
   const events = computeChangeEventsV2(schedulings);
 
@@ -124,7 +153,17 @@ export function SchedulingChangelogV2({ schedulings }: Props) {
       </Box>
 
       {/* Toolbar */}
-      <Stack direction="row" sx={{ justifyContent: 'flex-end', mb: 1.5 }}>
+      <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showDiffByCountry}
+              onChange={(e) => setShowDiffByCountry(e.target.checked)}
+              size="small"
+            />
+          }
+          label="Show diff by country"
+        />
         <Button
           size="small"
           variant="outlined"
@@ -171,9 +210,28 @@ export function SchedulingChangelogV2({ schedulings }: Props) {
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
-                        {row.countries.map((c) => (
-                          <Chip key={c} label={countryLabel(c)} size="small" variant="outlined" />
-                        ))}
+                        {showDiffByCountry
+                          ? row.countryDiffs.map((diff) => (
+                              <Tooltip
+                                key={diff.country}
+                                title={`Before: ${diff.langsBefore} lang${diff.langsBefore !== 1 ? 's' : ''} → After: ${diff.langsAfter} lang${diff.langsAfter !== 1 ? 's' : ''}`}
+                              >
+                                <Chip
+                                  label={
+                                    <CountryDiffChipLabel
+                                      diff={diff}
+                                      type={row.type}
+                                      changedCount={row.languages.length}
+                                    />
+                                  }
+                                  size="small"
+                                  variant="outlined"
+                                />
+                              </Tooltip>
+                            ))
+                          : row.countries.map((c) => (
+                              <Chip key={c} label={countryLabel(c)} size="small" variant="outlined" />
+                            ))}
                       </Stack>
                     </TableCell>
                     <TableCell>
