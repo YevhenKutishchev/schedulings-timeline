@@ -69,6 +69,99 @@ function diffStates(prev: StateMap, curr: StateMap): ChangeRow[] {
   return rows;
 }
 
+// ---------------------------------------------------------------------------
+// V2: four distinct change types
+// ---------------------------------------------------------------------------
+
+export type ChangeTypeV2 =
+  | 'country_activated'    // country became active for the first time (with these languages)
+  | 'country_deactivated'  // country became fully inactive (had these languages before)
+  | 'languages_added'      // country was already active and gained these languages
+  | 'languages_removed';   // country was already active and lost these languages (still active)
+
+export interface ChangeRowV2 {
+  type: ChangeTypeV2;
+  countries: string[];
+  languages: string[];
+}
+
+export interface ChangeEventV2 {
+  date: string;
+  rows: ChangeRowV2[];
+}
+
+function diffStatesV2(prev: StateMap, curr: StateMap): ChangeRowV2[] {
+  // Accumulate groups keyed by (type, sorted-lang-key)
+  const groups = new Map<string, { type: ChangeTypeV2; countries: string[] }>();
+
+  const allCountries = new Set([...prev.keys(), ...curr.keys()]);
+
+  for (const country of allCountries) {
+    const prevLangs = prev.get(country) ?? new Set<string>();
+    const currLangs = curr.get(country) ?? new Set<string>();
+
+    const wasActive = prevLangs.size > 0;
+    const isActive  = currLangs.size > 0;
+
+    const push = (type: ChangeTypeV2, langs: string[]) => {
+      const key = `${type}|${[...langs].sort().join(',')}`;
+      const g = groups.get(key) ?? { type, countries: [] };
+      g.countries.push(country);
+      groups.set(key, g);
+    };
+
+    if (!wasActive && isActive) {
+      push('country_activated', [...currLangs].sort());
+    } else if (wasActive && !isActive) {
+      push('country_deactivated', [...prevLangs].sort());
+    } else if (wasActive && isActive) {
+      const addedLangs   = [...currLangs].filter((l) => !prevLangs.has(l)).sort();
+      const removedLangs = [...prevLangs].filter((l) => !currLangs.has(l)).sort();
+      if (addedLangs.length   > 0) push('languages_added',   addedLangs);
+      if (removedLangs.length > 0) push('languages_removed', removedLangs);
+    }
+  }
+
+  const order: Record<ChangeTypeV2, number> = {
+    country_activated:   0,
+    languages_added:     1,
+    languages_removed:   2,
+    country_deactivated: 3,
+  };
+
+  return [...groups.entries()]
+    .map(([key, { type, countries }]) => ({
+      type,
+      countries: countries.sort(),
+      languages: key.split('|')[1].split(',').filter(Boolean),
+    }))
+    .sort((a, b) => order[a.type] - order[b.type]);
+}
+
+export function computeChangeEventsV2(schedulings: Scheduling[]): ChangeEventV2[] {
+  if (schedulings.length === 0) return [];
+
+  const dates = new Set<string>();
+  for (const s of schedulings) {
+    dates.add(s.startDate);
+    dates.add(dayjs(s.endDate).add(1, 'day').format('YYYY-MM-DD'));
+  }
+
+  const events: ChangeEventV2[] = [];
+  let prevState: StateMap = new Map();
+
+  for (const date of [...dates].sort()) {
+    const currState = getStateAt(schedulings, date);
+    const rows = diffStatesV2(prevState, currState);
+    if (rows.length > 0) {
+      events.push({ date, rows });
+    }
+    prevState = currState;
+  }
+
+  return events;
+}
+
 export function computeChangeEvents(schedulings: Scheduling[]): ChangeEvent[] {
   if (schedulings.length === 0) return [];
 

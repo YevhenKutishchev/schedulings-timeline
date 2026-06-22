@@ -32,13 +32,14 @@ import { SchedulingTable } from '../components/SchedulingTable/SchedulingTable';
 import { SchedulingTimeline } from '../components/SchedulingTimeline/SchedulingTimeline';
 import { SchedulingNonLinearTimeline } from '../components/SchedulingNonLinearTimeline/SchedulingNonLinearTimeline';
 import { SchedulingChangelog } from '../components/SchedulingChangelog/SchedulingChangelog';
+import { SchedulingChangelogV2 } from '../components/SchedulingChangelog/SchedulingChangelogV2';
 import { TimelineOperationDialog, type TimelineOperationMode } from '../components/TimelineOperation/TimelineOperationDialog';
 import { SchedulingFilters } from '../components/SchedulingFilters/SchedulingFilters';
 import { DEMO_SETS } from '../data/demoSchedulings';
 import { applyFilters } from '../utils/filters';
 import type { Scheduling, SchedulingDraft } from '../types/scheduling';
 
-type ViewMode = 'table' | 'timeline' | 'nonlinear' | 'changelog';
+type ViewMode = 'table' | 'timeline' | 'nonlinear' | 'changelog' | 'changelogV2';
 
 export function SchedulingsPage() {
   const { schedulings, add, update, remove, reset } = useSchedulings();
@@ -121,6 +122,10 @@ export function SchedulingsPage() {
             <ToggleButton value="changelog">
               <ChangeHistoryIcon fontSize="small" sx={{ mr: 0.5 }} />
               Changes
+            </ToggleButton>
+            <ToggleButton value="changelogV2">
+              <ChangeHistoryIcon fontSize="small" sx={{ mr: 0.5 }} />
+              Changes V2
             </ToggleButton>
             <ToggleButton value="timeline">
               <TimelineIcon fontSize="small" sx={{ mr: 0.5 }} />
@@ -230,7 +235,7 @@ export function SchedulingsPage() {
         </Stack>
       </Stack>
 
-      {schedulings.length > 0 && view !== 'changelog' && (
+      {schedulings.length > 0 && view !== 'changelog' && view !== 'changelogV2' && (
         <SchedulingFilters
           availableCountries={availableCountries}
           availableLanguages={availableLanguages}
@@ -270,6 +275,9 @@ export function SchedulingsPage() {
       )}
       {view === 'changelog' && (
         <SchedulingChangelog schedulings={schedulings} />
+      )}
+      {view === 'changelogV2' && (
+        <SchedulingChangelogV2 schedulings={schedulings} />
       )}
 
       <SchedulingForm

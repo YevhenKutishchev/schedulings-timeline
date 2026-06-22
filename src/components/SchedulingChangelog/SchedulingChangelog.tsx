@@ -4,6 +4,7 @@ import {
   Button,
   Checkbox,
   Chip,
+  Collapse,
   FormControlLabel,
   Paper,
   Stack,
@@ -17,6 +18,8 @@ import {
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import dayjs from 'dayjs';
 import type { Scheduling } from '../../types/scheduling';
 import { COUNTRIES } from '../../data/countries';
@@ -36,6 +39,7 @@ const languageLabel = (tag: string) =>
 export function SchedulingChangelog({ schedulings }: Props) {
   const [countOnly, setCountOnly] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [legendOpen, setLegendOpen] = useState(true);
 
   const events = computeChangeEvents(schedulings);
 
@@ -63,6 +67,37 @@ export function SchedulingChangelog({ schedulings }: Props) {
 
   return (
     <Box>
+      {/* Legend */}
+      <Box sx={{ mb: 2 }}>
+        <Button
+          size="small"
+          startIcon={<InfoOutlinedIcon />}
+          onClick={() => setLegendOpen((v) => !v)}
+          sx={{ textTransform: 'none', color: 'text.secondary' }}
+        >
+          {legendOpen ? 'Hide description' : 'How does this work?'}
+        </Button>
+        <Collapse in={legendOpen}>
+          <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              For each date where the active scheduling state changes, this view shows
+              which countries and languages were <Chip label="Added" color="success" size="small" sx={{ mx: 0.5 }} />
+              or <Chip label="Removed" color="error" size="small" sx={{ mx: 0.5 }} />.
+              Countries that share an identical change are grouped into one row.
+            </Typography>
+            <Stack direction="row" sx={{ alignItems: 'flex-start', gap: 1, mt: 1.5 }}>
+              <WarningAmberIcon fontSize="small" color="warning" sx={{ mt: 0.2, flexShrink: 0 }} />
+              <Typography variant="body2" color="text.secondary">
+                <strong>Known limitation:</strong> this view uses only two states — Added and Removed —
+                which can be ambiguous. For example, "Removed | France | Arabic" could mean France was
+                deactivated entirely, or it could mean only Arabic was removed while France remains
+                active with other languages.
+              </Typography>
+            </Stack>
+          </Paper>
+        </Collapse>
+      </Box>
+
       <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
         <FormControlLabel
           control={
